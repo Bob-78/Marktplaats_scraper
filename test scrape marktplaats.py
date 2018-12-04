@@ -28,21 +28,6 @@ def total_pages(base_page):
     # Return the total number as an int
     return total_pages
 
-
-# a function to construct the urls of the listpages to visit
-def append_number(url, page_number):
-    
-    print("function append_number called...")
-    
-    # appending the count number to the base page URL
-    listpage_url = url + str(page_number)
-
-    print("page url created: {}".format(page_url))
-    
-    # return the url
-    return listpage_url
-
-
 # A function to get all the relevant car URLs of one page (soup):
 def get_page_urls(url, page):
 
@@ -62,12 +47,12 @@ def get_page_urls(url, page):
     # let's throw away the HTML from where the ads start at the bottom of the list 
     # this avoids getting false results in our table (i.e. the ads at the bottom of the list)
     ad_part = soup.find("div", {"class": "row bottom-group search-result bottom-listing listing-cas"})
-    for elm in ad_part.find_next_siblings(): 
-        elm.extract()
-    ad_part.extract()
+    for elm in ad_part.find_next_siblings(): # from tag ad part, go to the end of the document
+        elm.extract() # delete each element
+    ad_part.extract() # delete the ad part itself
 
     # get the raw urls from the soup 
-    urls_raw = soup.find_all("a", class_ = "listing-table-mobile-link correlation-link")
+    urls_raw = soup.find_all("a", class_ = "listing-table-mobile-link correlation-link") #this still contains htmls tags etc.
         
     # get the clean urls
     urls = [x.get("href") for x in urls_raw]
@@ -87,7 +72,7 @@ def get_all_urls(url, number_of_pages):
     
     # For each page in the range, get the urls on that page and extend our list:
     for x in range(number_of_pages):
-        page_urls = get_page_urls(url, x + 1)
+        page_urls = get_page_urls(url, x + 1) # this first number in the range is 0, so x+1 has us start at the first page
         
         # add this page's URLs to our list of urls
         url_list.extend(page_urls)
@@ -102,7 +87,7 @@ def get_all_urls(url, number_of_pages):
 
 # --SECOND, GO THROUGH THE URL LIST AND SCRAPE THE SUMMARY FOR EACH CAR-- #
 
-# a function to get the details of a car, they are returned as a dictionary
+# a function to get the details of a car, which are returned as a dictionary of attributes
 def get_car_details(url):
 
     print("getting car details from: {}".format(url))
@@ -113,7 +98,7 @@ def get_car_details(url):
     # parse the html using beautiful soup and store in variable `soup`
     soup = BeautifulSoup(html, "html.parser")
 
-    # get the data of the first script tag and convert into a string for string manipulation
+    # get the data of the first <script> tag (where our data is) and convert into a string for string manipulation
     data = str(soup.find("script"))
 
     # cut the <script> tag and some other things from the beginning and end to get valid JSON
@@ -128,7 +113,7 @@ def get_car_details(url):
     # get the subset of jsoned where the most relevant variables are
     attr_raw = jsoned["a"]["attr"]
     
-    # convert all dict values in raw_attr to str if they happen to be lists (some are, some aren't)
+    # convert all dict values in raw_attr to str if they happen to be lists (some are, some aren't), we need a homogenous set
     attr = {key: str(value[0]) for key, value in attr_raw.items() if isinstance(value, (list,))}
     
     # add prijs (from another part of jsoned) to attr
@@ -136,7 +121,7 @@ def get_car_details(url):
     # add merk (from another part of jsoned) to attr
     attr["Merk"] = jsoned["c"]["c"]["n"]
     
-    # make a list of each value in attr
+    # make a list of each value in attr. We need this step so the output can be read into a Pandas DataFrame later. 
     for key in attr: 
         attr[key] = [attr[key]]
     
@@ -144,32 +129,28 @@ def get_car_details(url):
     
     return attr
 
-# a function to add the car details to a dataframe
-def add_car_results_to_df(df, attr):
-    
-    print("Function add_car_results_to_df called")
-    
-    df = df.append(attr, ignore_index=True)
-    
-    print("data added to df: {}".format(df))
-    
-    return df
 
-
+# A function to get everything going. Takes two arguments: the base_url, the number of pages it should crawl.
 def main_function(base_url, pages):
 
+    # create the list of all urls, 
     all_urls = get_all_urls(base_url, pages)
 
+    # create an empty dataframe we can append to
     df = pd.DataFrame()
 
+    # go through the list of urls, for each page get the details, add them to the dataframe
     for ad_url in all_urls:
     
-        details = get_car_details(ad_url) # this returns a dictionary all_urls[22] for single entry
+        details = get_car_details(ad_url) # this fuction returns a dictionary of attr
 
-        df = add_car_results_to_df(df, details)
+        #append the attributes to the df
+        df = df.append(details, ignore_index=True) # as we append a (possibly) different set of keys, we need to ignore the inde
         
+        # wait a bit to not overload the server and get banned
         time.sleep(2.5)  
 
+    # write the df to a csv file
     df.to_csv("newfilename.csv", sep=";", index=False)
     
     print("newfilename.csv saved to program directory")
