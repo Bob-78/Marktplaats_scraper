@@ -170,9 +170,12 @@ def main_function(base_url, pages):
         
         time.sleep(2.5)  
 
-    df.to_csv('newfilename.csv', sep=';', index=False)
+    df.to_csv("newfilename.csv", sep=";", index=False)
+    
+    print("newfilename.csv saved to program directory")
 
 # define base URL, the format should end with "currentpage="
-base_url = "https://www.marktplaats.nl/z/auto-s/ferrari/ferrari.html?query=ferrari&categoryId=110&currentPage="
+base_url = "https://www.marktplaats.nl/z/auto-s/maserati.html?categoryId=128&currentPage="
 
-main_function(base_url, 2)
+# run the main function with url, pages to scrape. Add total_pages(base_url) as argument to scrape all pages
+main_function(base_url, total_pages(base_url))
