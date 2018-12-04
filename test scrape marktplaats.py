@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import time
 import json
-import re
 import csv
 
 # --FIRST, GET A LIST OF ALL THE URLs OF THE ITEMS WE'RE INTERESTED IN
@@ -61,7 +60,7 @@ def get_page_urls(url, page):
     
     return urls
 
-# a function to get all car page urls from all pages
+# a function to build a list of all ad page urls
 def get_all_urls(url, number_of_pages):
     
     print("function get_all_urls called...")
@@ -142,21 +141,24 @@ def main_function(base_url, pages):
     # go through the list of urls, for each page get the details, add them to the dataframe
     for ad_url in all_urls:
     
+        # get the attr of the ad page 
         details = get_car_details(ad_url) # this fuction returns a dictionary of attr
 
         #append the attributes to the df
         df = df.append(details, ignore_index=True) # as we append a (possibly) different set of keys, we need to ignore the inde
         
+        print("data added to df: {}".format(df))
+        
         # wait a bit to not overload the server and get banned
         time.sleep(2.5)  
 
     # write the df to a csv file
-    df.to_csv("newfilename.csv", sep=";", index=False)
+    df.to_csv("results_marktplaats_scraper.csv", sep=";", index=False)
     
     print("results_marktplaats_scraper.csv saved to program directory")
 
 # define base URL, the format should end with "currentpage="
 base_url = "https://www.marktplaats.nl/z/auto-s/maserati.html?categoryId=128&currentPage="
 
-# run the main function with url, pages to scrape. Add total_pages(base_url) as argument to scrape all pages
-main_function(base_url, total_pages(base_url))
+# run the main function with url, pages to scrape. Use total_pages(base_url) as argument to scrape all pages
+main_function(base_url, 1)
