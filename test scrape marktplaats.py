@@ -153,7 +153,7 @@ def main_function(base_url, pages):
     # write the df to a csv file
     df.to_csv("newfilename.csv", sep=";", index=False)
     
-    print("newfilename.csv saved to program directory")
+    print("results_marktplaats_scraper.csv saved to program directory")
 
 # define base URL, the format should end with "currentpage="
 base_url = "https://www.marktplaats.nl/z/auto-s/maserati.html?categoryId=128&currentPage="
