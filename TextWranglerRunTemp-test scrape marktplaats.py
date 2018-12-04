@@ -167,8 +167,6 @@ def main_function(base_url, pages):
         details = get_car_details(ad_url) # this returns a dictionary all_urls[22] for single entry
 
         df = add_car_results_to_df(df, details)
-        
-        time.sleep(2.5)  
 
     df.to_csv('newfilename.csv', sep=';', index=False)
 
