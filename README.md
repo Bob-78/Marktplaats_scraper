@@ -1,4 +1,4 @@
- a# Marktplaats_scraper
+# Marktplaats_scraper
 
 This is a scraper written in Python. It uses BeautifulSoup, a Python library for pulling data out of HTML and XML files, and Pandas for data storage and manipulation. It is designed to scrape data from the largest Dutch second hand market, Marktplaats.nl.
 
