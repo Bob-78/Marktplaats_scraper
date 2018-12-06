@@ -142,7 +142,7 @@ def main_function(base_url, pages):
     for ad_url in all_urls:
     
         # get the attr of the ad page 
-        details = get_car_details(ad_url) # this function returns a dictionary of attr
+        details = get_car_details(ad_url) # this fuction returns a dictionary of attr
 
         #append the attributes to the df
         df = df.append(details, ignore_index=True) # as we append a (possibly) different set of keys, we need to ignore the inde
