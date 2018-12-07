@@ -97,36 +97,20 @@ def get_car_details(url):
     # parse the html using beautiful soup and store in variable `soup`
     soup = BeautifulSoup(html, "html.parser")
 
-    # get the data of the first <script> tag (where our data is) and convert into a string for string manipulation
-    data = str(soup.find("script"))
-
-    # cut the <script> tag and some other things from the beginning and end to get valid JSON
-    cut = data[27:-13]
-
-    # encode the data so that the json parser can handle it
-    encoded = cut.encode('utf-8')
-
-    # load the data as a json dictionary
-    jsoned = json.loads(encoded)
+    # get the keys
+    keys = [item.get_text() for item in soup.select("span.key")] # get all the span keys
+    keys = [item.replace("\n", "") for item in keys] # some cleanup
+    keys = [item.replace("  ", "") for item in keys] # some cleanup
     
-    # get the subset of jsoned where the most relevant variables are
-    attr_raw = jsoned["a"]["attr"]
+    # get the values
+    values = [item.get_text() for item in soup.select("span.value")] # get all the span values
     
-    # convert all dict values in raw_attr to str if they happen to be lists (some are, some aren't), we need a homogenous set
-    attr = {key: str(value[0]) for key, value in attr_raw.items() if isinstance(value, (list,))}
+    # zip the keys and values together as tuples, and make into a dictionary so our df can process
+    attr2 = dict(list(zip(keys, values))) 
     
-    # add prijs (from another part of jsoned) to attr
-    attr["Prijs"] = int(jsoned["a"]["prc"]["amt"])/100 # divide by 100 because contains two extra zeros, make int
-    # add merk (from another part of jsoned) to attr
-    attr["Merk"] = jsoned["c"]["c"]["n"]
+    print("returning attr: {}".format(attr2))
     
-    # make a list of each value in attr. We need this step so the output can be read into a Pandas DataFrame later. 
-    for value in attr: 
-        attr[value] = [attr[value]]
-    
-    print("returning attr: {}".format(attr))
-    
-    return attr
+    return attr2
 
 
 # A function to get everything going. Takes two arguments: the base_url, the number of pages it should crawl.
