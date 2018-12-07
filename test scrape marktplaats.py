@@ -54,7 +54,7 @@ def get_page_urls(url, page):
     urls_raw = soup.find_all("a", class_ = "listing-table-mobile-link correlation-link") #this still contains htmls tags etc.
         
     # get the clean urls
-    urls = [x.get("href") for x in urls_raw]
+    urls = [url.get("href") for url in urls_raw]
 
     print("{} urls received from link above.".format(len(urls))) 
     
